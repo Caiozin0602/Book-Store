@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Book Store</title>
+  <meta name="description" content="Livraria online Book Store - livros em PDF a preços acessíveis com catálogo, busca, filtros, carrinho e modo escuro" />
+  <style>
+    /* ===========================
+       Reset e variáveis de tema
+       =========================== */
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #0b63d6;
+      --accent-2: #0a58b8;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 6px 18px rgba(15,23,42,0.08);
+      --radius: 12px;
+      --mono: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --transition: 200ms cubic-bezier(.2,.9,.3,1);
+    }
+
+    /* Modo escuro */
+    .dark {
+      --bg: #0b1220;
+      --card: #071022;
+      --text: #e6eef8;
+      --muted: #9aa7bd;
+      --accent: #3b82f6;
+      --accent-2: #2563eb;
+      --glass: rgba(255,255,255,0.04);
+      --shadow: 0 8px 30px rgba(2,6,23,0.6);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--mono);
+      background:linear-gradient(180deg,var(--bg), #e9eefb 120%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      transition:background var(--transition), color var(--transition);
+    }
+
+    /* ===========================
+       Layout principal
+       =========================== */
+    .container{
+      max-width:1200px;
+      margin:28px auto;
+      padding:0 20px;
+    }
+
+    header.site-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:18px 0;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .logo{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+      box-shadow:var(--shadow);
+      flex-shrink:0;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:1.15rem;
+      letter-spacing:0.2px;
+    }
+
+    nav.top-nav{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .nav-link{
+      color:var(--muted);
+      text-decoration:none;
+      font-weight:600;
+      padding:8px 12px;
+      border-radius:8px;
+      transition:all var(--transition);
+    }
+
+    .nav-link:hover{color:var(--text); background:var(--glass)}
+
+    /* Busca e ações */
+    .actions{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .search {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:var(--card);
+      padding:8px 12px;
+      border-radius:999px;
+      box-shadow:var(--shadow);
+      min-width:260px;
+    }
+
+    .search input{
+      border:0;
+      outline:0;
+      background:transparent;
+      width:100%;
+      color:var(--text);
+      font-size:0.95rem;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:var(--accent);
+      color:white;
+      border:0;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      transition:transform var(--transition), background var(--transition);
+    }
+
+    .btn.secondary{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid rgba(11,99,214,0.12);
+      font-weight:700;
+    }
+
+    .btn.ghost{
+      background:transparent;
+      color:var(--muted);
+      border-radius:8px;
+      padding:8px;
+    }
+
+    .btn:active{transform:translateY(1px)}
+
+    /* ===========================
+       Banner principal
+       =========================== */
+    .hero{
+      margin-top:18px;
+      background:
+        linear-gradient(180deg, rgba(11,99,214,0.06), rgba(11,99,214,0.02)),
+        url('https://picsum.photos/1200/400?books') center/cover no-repeat;
+      border-radius:16px;
+      padding:36px;
+      color:var(--text);
+      display:flex;
+      gap:24px;
+      align-items:center;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .hero .left{
+      flex:1;
+      min-width:260px;
+    }
+
+    .hero h2{
+      margin:0 0 8px 0;
+      font-size:1.8rem;
+      line-height:1.05;
+    }
+
+    .hero p{margin:0 0 16px 0; color:var(--muted)}
+
+    .hero .cta{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .hero .stats{
+      display:flex;
+      gap:12px;
+      margin-top:18px;
+    }
+
+    .stat{
+      background:var(--card);
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow:var(--shadow);
+      min-width:120px;
+      text-align:center;
+    }
+
+    .stat strong{display:block; font-size:1.1rem}
+
+    /* ===========================
+       Filtros e catálogo
+       =========================== */
+    .catalog{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      gap:20px;
+      margin-top:28px;
+      align-items:start;
+    }
+
+    aside.filters{
+      background:var(--card);
+      padding:18px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      position:sticky;
+      top:28px;
+      height:fit-content;
+    }
+
+    .filters h3{margin:0 0 12px 0}
+    .filter-group{margin-bottom:14px}
+    .filter-group label{display:block; font-weight:700; margin-bottom:8px; color:var(--muted)}
+    .checkbox-list{display:flex; flex-direction:column; gap:8px}
+    .checkbox-list label{font-weight:600; color:var(--text)}
+
+    .range{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    .catalog-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+      gap:18px;
+    }
+
+    .book-card{
+      background:var(--card);
+      border-radius:12px;
+      padding:12px;
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      transition:transform var(--transition), box-shadow var(--transition);
+    }
+
+    .book-card:hover{transform:translateY(-6px)}
+    .book-cover{
+      width:100%;
+      height:300px;
+      border-radius:8px;
+      overflow:hidden;
+      background:#ddd;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .book-cover img{width:100%; height:100%; object-fit:cover; display:block}
+
+    .book-info h4{margin:0; font-size:1rem}
+    .book-info p{margin:0; color:var(--muted); font-size:0.9rem}
+
+    .price-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+
+    .price{
+      font-weight:800;
+      color:var(--accent);
+    }
+
+    .old-price{
+      text-decoration:line-through;
+      color:var(--muted);
+      font-weight:700;
+      font-size:0.9rem;
+    }
+
+    .card-actions{
+      display:flex;
+      gap:8px;
+      margin-top:auto;
+    }
+
+    /* ===========================
+       Modal detalhes do livro
+       =========================== */
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(2,6,23,0.6);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:60;
+      padding:20px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity var(--transition);
+    }
+
+    .modal-backdrop.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .modal{
+      width:100%;
+      max-width:900px;
+      background:var(--card);
+      border-radius:14px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .modal .cover{height:420px; border-radius:10px; overflow:hidden}
+    .modal h3{margin:0 0 8px 0}
+    .modal .meta{color:var(--muted); margin-bottom:12px}
+
+    .close-btn{
+      background:transparent;
+      border:0;
+      color:var(--muted);
+      font-weight:800;
+      cursor:pointer;
+      padding:6px 8px;
+      border-radius:8px;
+    }
+
+    /* ===========================
+       Carrinho lateral
+       =========================== */
+    .cart-drawer{
+      position:fixed;
+      right:0;
+      top:0;
+      height:100vh;
+      width:360px;
+      transform:translateX(110%);
+      transition:transform var(--transition);
+      z-index:70;
+      box-shadow: -20px 0 40px rgba(2,6,23,0.2);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:18px;
+      background:var(--card);
+    }
+
+    .cart-drawer.open{transform:translateX(0%)}
+
+    .cart-item{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:8px;
+      border-radius:10px;
+      background:var(--glass);
+    }
+
+    .cart-item img{width:56px; height:80px; object-fit:cover; border-radius:6px}
+
+    .cart-footer{margin-top:auto; display:flex; flex-direction:column; gap:8px}
+
+    /* ===========================
+       Footer
+       =========================== */
+    footer.site-footer{
+      margin-top:36px;
+      padding:28px 0;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    /* ===========================
+       Responsividade
+       =========================== */
+    @media (max-width:980px){
+      .catalog{grid-template-columns:1fr}
+      aside.filters{position:static; top:auto}
+      .hero{flex-direction:column; align-items:flex-start}
+      .modal{grid-template-columns:1fr}
+      .modal .cover{height:260px}
+      .cart-drawer{width:100%; max-width:420px}
+    }
+
+    @media (max-width:520px){
+      .search{min-width:160px}
+      .hero h2{font-size:1.3rem}
+      .brand h1{font-size:1rem}
+      .logo{width:48px; height:48px}
+    }
+
+    /* ===========================
+       Pequenas animações e utilitários
+       =========================== */
+    .fade-in{animation:fadeIn .6s ease both}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+    .sr-only{
+      position:absolute!important;
+      height:1px;width:1px;
+      overflow:hidden;clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;border:0;padding:0;margin:-1px;
+    }
+
+    .badge{
+      background:var(--accent);
+      color:white;
+      padding:6px 8px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:0.8rem;
+    }
+
+    /* Formulário contato */
+    .contact-form{display:grid; gap:10px}
+    .input, textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(15,23,42,0.06);
+      background:transparent;
+      color:var(--text);
+      font-size:0.95rem;
+    }
+    textarea{min-height:120px; resize:vertical}
+    .error{color:var(--danger); font-weight:700; font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Cabeçalho -->
+    <header class="site-header">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">BS</div>
+        <div>
+          <h1>Book Store</h1>
+          <div style="color:var(--muted); font-size:0.85rem">Livros em PDF a preços acessíveis</div>
+        </div>
+      </div>
+
+            <!-- VLibras -->
+      <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
+        </div>
+      </div>
+      <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+      <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+      </script>
+
+
+      <nav class="top-nav" aria-label="Navegação principal">
+        <a class="nav-link" href="#catalogo">Catálogo</a>
+        <a class="nav-link" href="#sobre">Sobre</a>
+        <a class="nav-link" href="#contato">Contato</a>
+      </nav>
+
+      <div class="actions" role="region" aria-label="Ações">
+        <div class="search" role="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 21l-4.35-4.35" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="11" cy="11" r="6" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input id="searchInput" type="search" placeholder="Buscar por título, autor ou categoria" aria-label="Buscar livros" />
+        </div>
+
+        <button id="themeToggle" class="btn ghost" title="Alternar tema" aria-pressed="false">Modo Escuro</button>
+        <button id="cartBtn" class="btn secondary" aria-haspopup="dialog" aria-controls="cartDrawer">Carrinho <span id="cartCount" class="badge" style="margin-left:8px">0</span></button>
+      </div>
+    </header>
+
+    <!-- Banner -->
+    <section class="hero fade-in" aria-labelledby="heroTitle">
+      <div class="left">
+        <h2 id="heroTitle">Descubra seu próximo livro favorito</h2>
+        <p>Seleção curada de ficção, não ficção, infantojuvenil e clássicos. Promoções semanais e frete rápido.</p>
+        <div class="cta">
+          <button class="btn" id="exploreBtn">Explorar catálogo</button>
+          <button class="btn secondary" id="promoBtn">Ver promoções</button>
+        </div>
+
+        <div class="stats" aria-hidden="true">
+          <div class="stat">
+            <strong>12k+</strong>
+            <span style="color:var(--muted)">Leitores</span>
+          </div>
+          <div class="stat">
+            <strong>3k+</strong>
+            <span style="color:var(--muted)">Títulos</span>
+          </div>
+          <div class="stat">
+            <strong>4.9</strong>
+            <span style="color:var(--muted)">Avaliação média</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="right" style="min-width:320px; display:flex; align-items:center; justify-content:center">
+        <!-- Imagem decorativa -->
+        <div style="width:320px; height:220px; border-radius:12px; overflow:hidden; box-shadow:var(--shadow)">
+          <img src="https://picsum.photos/640/420?bookstore" alt="Livros empilhados" style="width:100%; height:100%; object-fit:cover; display:block" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Catálogo e filtros -->
+    <main class="catalog" id="catalogo" aria-labelledby="catalogTitle">
+      <aside class="filters" aria-label="Filtros do catálogo">
+        <h3 id="catalogTitle">Filtrar resultados</h3>
+
+        <div class="filter-group">
+          <label for="categorySelect">Categoria</label>
+          <select id="categorySelect" class="input" aria-label="Selecionar categoria">
+            <option value="">Todas</option>
+            <option>Ficção</option>
+            <option>Não Ficção</option>
+            <option>Infantojuvenil</option>
+            <option>Clássicos</option>
+            <option>Autoajuda</option>
+            <option>Biografia</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Faixa de preço</label>
+          <div class="range">
+            <input id="minPrice" class="input" type="number" placeholder="Min R$" min="0" />
+            <input id="maxPrice" class="input" type="number" placeholder="Max R$" min="0" />
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <label>Ordenar por</label>
+          <select id="sortSelect" class="input" aria-label="Ordenar livros">
+            <option value="relevance">Mais relevantes</option>
+            <option value="price-asc">Preço crescente</option>
+            <option value="price-desc">Preço decrescente</option>
+            <option value="rating-desc">Melhor avaliação</option>
+            <option value="newest">Mais novos</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label>Disponibilidade</label>
+          <div class="checkbox-list">
+            <label><input type="checkbox" id="inStock" /> Em estoque</label>
+            <label><input type="checkbox" id="onSale" /> Em promoção</label>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px">
+          <button id="applyFilters" class="btn">Aplicar</button>
+          <button id="clearFilters" class="btn secondary">Limpar</button>
+        </div>
+      </aside>
+
+      <section>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px">
+          <h2 style="margin:0">Catálogo</h2>
+          <div style="color:var(--muted)">Mostrando <span id="resultsCount">0</span> resultados</div>
+        </div>
+
+        <div id="catalogGrid" class="catalog-grid" aria-live="polite"></div>
+
+        <!-- Paginação simples -->
+        <div style="display:flex; justify-content:center; margin-top:18px; gap:8px">
+          <button id="prevPage" class="btn ghost">Anterior</button>
+          <div id="pageInfo" style="align-self:center; color:var(--muted)">Página 1</div>
+          <button id="nextPage" class="btn ghost">Próxima</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal detalhes -->
+    <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal" role="document" aria-labelledby="modalTitle">
+        <div>
+          <div class="cover" id="modalCover"></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:start; gap:12px">
+            <div>
+              <h3 id="modalTitle">Título do livro</h3>
+              <div class="meta" id="modalMeta">Autor • Categoria • 2026</div>
+            </div>
+            <div>
+              <button class="close-btn" id="modalClose" aria-label="Fechar">✕</button>
+            </div>
+          </div>
+
+          <p id="modalDescription" style="color:var(--muted)"></p>
+
+          <div style="display:flex; gap:12px; margin-top:12px; align-items:center">
+            <div style="font-size:1.4rem; font-weight:900; color:var(--accent)" id="modalPrice">R$ 0,00</div>
+            <div style="color:var(--muted); text-decoration:line-through" id="modalOldPrice"></div>
+            <div style="margin-left:auto">
+              <button id="modalAddCart" class="btn">Adicionar ao carrinho</button>
+            </div>
+          </div>
+
+          <div style="margin-top:18px">
+            <h4 style="margin:0 0 8px 0">Detalhes</h4>
+            <ul id="modalDetails" style="margin:0; padding-left:18px; color:var(--muted)"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Carrinho lateral -->
+    <aside id="cartDrawer" class="cart-drawer" aria-hidden="true" aria-label="Carrinho de compras">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <h3 style="margin:0">Seu carrinho</h3>
+        <button class="close-btn" id="closeCart" aria-label="Fechar carrinho">✕</button>
+      </div>
+
+      <div id="cartItems" style="display:flex; flex-direction:column; gap:8px; margin-top:8px"></div>
+
+      <div class="cart-footer">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <div style="color:var(--muted)">Subtotal</div>
+          <div id="cartSubtotal" style="font-weight:900">R$ 0,00</div>
+        </div>
+        <div style="display:flex; gap:8px">
+          <button id="checkoutBtn" class="btn" style="flex:1">Finalizar compra</button>
+          <button id="clearCart" class="btn secondary" style="flex:1">Limpar</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sobre e contato -->
+    <section id="sobre" style="margin-top:36px">
+      <div style="background:var(--card); padding:18px; border-radius:12px; box-shadow:var(--shadow)">
+        <h2>Sobre a Book Store</h2>
+        <p style="color:var(--muted)">A Book Store é uma plataforma dedicada a democratizar o acesso à leitura através de livros em formato PDF a preços acessíveis. Nossa missão é garantir que pessoas em situação de vulnerabilidade tenham acesso ao conhecimento e à leitura de qualidade.</p>
+
+        <h3 style="margin-top:12px">Serviços</h3>
+        <ul style="color:var(--muted)">
+          <li>Entrega expressa para capitais</li>
+          <li>Assinatura mensal de novidades</li>
+          <li>Clube do livro com encontros online</li>
+        </ul>
+      </div>
+
+      <!-- Página MVV em layout horizontal -->
+      <section id="mvv" style="margin-top:20px; background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow)">
+        <h2>Missão, Visão e Valores</h2>
+        <p style="color:var(--muted); margin-bottom:20px">A Book Store acredita em democratizar o acesso à leitura e transformar vidas através do conhecimento acessível.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px">
+          <div>
+            <h3 style="margin-top:0">Missão</h3>
+            <p style="color:var(--muted)">Fornecer livros em formato PDF a preços acessíveis, garantindo que mesmo pessoas em situação de vulnerabilidade tenham acesso à leitura e ao conhecimento.</p>
+          </div>
+
+          <div>
+            <h3 style="margin-top:0">Visão</h3>
+            <p style="color:var(--muted)">Ser referência entre as livrarias, expandindo globalmente e tornando-se reconhecida mundialmente como promotora da inclusão literária.</p>
+          </div>
+
+          <div>
+            <h3 style="margin-top:0">Valores</h3>
+            <ul style="color:var(--muted); margin-top:0">
+              <li>Inclusão</li>
+              <li>Respeito</li>
+              <li>Educação</li>
+              <li>Sustentabilidade</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção do PDF em layout vertical -->
+      <section style="margin-top:20px; background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow)">
+        <h3>Exemplo de PDF acessível</h3>
+        <p style="color:var(--muted)">Abaixo está um exemplo de documento que fornecemos aos compradores. Pessoas cegas podem usar leitores de tela para interpretar o conteúdo.</p>
+
+        <!-- Embed PDF -->
+        <iframe src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
+                title="Exemplo de PDF acessível"
+                width="100%" height="500"
+                style="border:1px solid #ccc; border-radius:8px"></iframe>
+
+        <!-- Texto alternativo -->
+        <p style="margin-top:12px; color:var(--muted)">
+          Resumo do PDF: Este documento demonstra como fornecemos informações acessíveis em formato digital, garantindo que leitores de tela possam interpretar o conteúdo.
+        </p>
+      </section>
+
+      <div id="contato" style="margin-top:20px; background:var(--card); padding:18px; border-radius:12px; box-shadow:var(--shadow)">
+        <h3>Fale conosco</h3>
+        <form id="contactForm" class="contact-form" novalidate>
+          <label class="sr-only" for="name">Nome</label>
+          <input id="name" class="input" type="text" placeholder="Seu nome" required />
+
+          <label class="sr-only" for="email">Email</label>
+          <input id="email" class="input" type="email" placeholder="seu@exemplo.com" required />
+
+          <label class="sr-only" for="message">Mensagem</label>
+          <textarea id="message" placeholder="Como podemos ajudar?" required></textarea>
+
+          <div id="contactError" class="error" role="alert" style="display:none"></div>
+
+          <div style="display:flex; gap:8px">
+            <button type="submit" class="btn">Enviar mensagem</button>
+            <button type="reset" class="btn secondary">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="site-footer">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+        <div style="min-width:220px">
+          <strong>Book Store</strong>
+          <div style="color:var(--muted)">Rua das Letras, 123 • São Paulo • SP</div>
+        </div>
+
+        <div style="color:var(--muted)">© <span id="year"></span> Book Store - Todos os direitos reservados</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* ===========================
+       Dados iniciais do catálogo
+       =========================== */
+    const BOOKS = [
+      {
+        id: 'b1',
+        title: 'O Segredo das Palavras',
+        author: 'Ana Silva',
+        category: 'Ficção',
+        price: 49.90,
+        oldPrice: 69.90,
+        rating: 4.7,
+        year: 2023,
+        cover: 'https://picsum.photos/seed/book1/400/600',
+        inStock: true,
+        onSale: true,
+        description: 'Um romance envolvente sobre linguagem, memórias e segundas chances.',
+        pages: 320,
+        publisher: 'Editora Aurora'
+      },
+      {
+        id: 'b2',
+        title: 'Histórias do Amanhã',
+        author: 'João Pereira',
+        category: 'Ficção',
+        price: 39.90,
+        oldPrice: null,
+        rating: 4.4,
+        year: 2024,
+        cover: 'https://picsum.photos/seed/book2/400/600',
+        inStock: true,
+        onSale: false,
+        description: 'Contos curtos que exploram futuros possíveis e dilemas humanos.',
+        pages: 240,
+        publisher: 'Lumen'
+      },
+      {
+        id: 'b3',
+        title: 'Entre Linhas e Sonhos',
+        author: 'Maria Costa',
+        category: 'Clássicos',
+        price: 59.90,
+        oldPrice: 79.90,
+        rating: 4.9,
+        year: 1998,
+        cover: 'https://picsum.photos/seed/book3/400/600',
+        inStock: false,
+        onSale: true,
+        description: 'Um clássico moderno que atravessa gerações com delicadeza.',
+        pages: 420,
+        publisher: 'Clássica'
+      },
+      {
+        id: 'b4',
+        title: 'Manual do Leitor Curioso',
+        author: 'Paulo Mendes',
+        category: 'Não Ficção',
+        price: 29.90,
+        oldPrice: null,
+        rating: 4.2,
+        year: 2021,
+        cover: 'https://picsum.photos/seed/book4/400/600',
+        inStock: true,
+        onSale: false,
+        description: 'Dicas práticas para cultivar o hábito da leitura e escolher bons títulos.',
+        pages: 180,
+        publisher: 'Prática'
+      },
+      {
+        id: 'b5',
+        title: 'Pequenos Heróis',
+        author: 'Clara Nunes',
+        category: 'Infantojuvenil',
+        price: 24.90,
+        oldPrice: 34.90,
+        rating: 4.8,
+        year: 2022,
+        cover: 'https://picsum.photos/seed/book5/400/600',
+        inStock: true,
+        onSale: true,
+        description: 'Histórias para crianças que celebram coragem e amizade.',
+        pages: 96,
+        publisher: 'Infanto'
+      },
+      {
+        id: 'b6',
+        title: 'Viver com Propósito',
+        author: 'Renata Lima',
+        category: 'Autoajuda',
+        price: 44.90,
+        oldPrice: null,
+        rating: 4.1,
+        year: 2020,
+        cover: 'https://picsum.photos/seed/book6/400/600',
+        inStock: true,
+        onSale: false,
+        description: 'Ferramentas práticas para encontrar sentido no dia a dia.',
+        pages: 256,
+        publisher: 'BemViver'
+      },
+      {
+        id: 'b7',
+        title: 'Biografia de um Sonhador',
+        author: 'Carlos Duarte',
+        category: 'Biografia',
+        price: 54.90,
+        oldPrice: 64.90,
+        rating: 4.6,
+        year: 2019,
+        cover: 'https://picsum.photos/seed/book7/400/600',
+        inStock: true,
+        onSale: true,
+        description: 'A trajetória inspiradora de um empreendedor cultural.',
+        pages: 360,
+        publisher: 'Vidas'
+      },
+      {
+        id: 'b8',
+        title: 'Caminhos da Ciência',
+        author: 'Equipe Editorial',
+        category: 'Não Ficção',
+        price: 69.90,
+        oldPrice: null,
+        rating: 4.5,
+        year: 2025,
+        cover: 'https://picsum.photos/seed/book8/400/600',
+        inStock: true,
+        onSale: false,
+        description: 'Ensaios sobre descobertas recentes e o impacto na sociedade.',
+        pages: 480,
+        publisher: 'Ciência Hoje'
+      },
+      {
+        id: 'b9',
+        title: 'Noite de Verão',
+        author: 'Lívia Rocha',
+        category: 'Ficção',
+        price: 34.90,
+        oldPrice: null,
+        rating: 4.0,
+        year: 2018,
+        cover: 'https://picsum.photos/seed/book9/400/600',
+        inStock: true,
+        onSale: false,
+        description: 'Romance leve sobre encontros e desencontros em uma cidade litorânea.',
+        pages: 280,
+        publisher: 'Maré'
+      },
+      {
+        id: 'b10',
+        title: 'Atlas das Ideias',
+        author: 'Vários Autores',
+        category: 'Não Ficção',
+        price: 89.90,
+        oldPrice: 99.90,
+        rating: 4.9,
+        year: 2017,
+        cover: 'https://picsum.photos/seed/book10/400/600',
+        inStock: true,
+        onSale: true,
+        description: 'Compilado de ensaios que mapeiam pensamentos influentes do século XX.',
+        pages: 640,
+        publisher: 'Atlas'
+      }
+    ];
+
+    /* ===========================
+       Estado da aplicação
+       =========================== */
+    let state = {
+      books: BOOKS.slice(),
+      query: '',
+      category: '',
+      minPrice: null,
+      maxPrice: null,
+      sort: 'relevance',
+      inStock: false,
+      onSale: false,
+      page: 1,
+      perPage: 8,
+      cart: loadCart()
+    };
+
+    /* ===========================
+       Utilitários
+       =========================== */
+    function formatCurrency(v){
+      return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    }
+
+    function byId(id){ return document.getElementById(id) }
+
+    function saveCart(){
+      try{
+        localStorage.setItem('livraria_cart_v1', JSON.stringify(state.cart));
+        updateCartUI();
+      }catch(e){ console.warn('Erro ao salvar carrinho', e) }
+    }
+
+    function loadCart(){
+      try{
+        const raw = localStorage.getItem('livraria_cart_v1');
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){ return [] }
+    }
+
+    function findBook(id){
+      return BOOKS.find(b => b.id === id);
+    }
+
+    /* ===========================
+       Renderização do catálogo
+       =========================== */
+    const catalogGrid = byId('catalogGrid');
+    const resultsCount = byId('resultsCount');
+    const pageInfo = byId('pageInfo');
+
+    function applyFilters(){
+      let list = BOOKS.slice();
+
+      // busca por texto
+      const q = state.query.trim().toLowerCase();
+      if(q){
+        list = list.filter(b => {
+          return b.title.toLowerCase().includes(q) ||
+                 b.author.toLowerCase().includes(q) ||
+                 b.category.toLowerCase().includes(q);
+        });
+      }
+
+      // categoria
+      if(state.category){
+        list = list.filter(b => b.category === state.category);
+      }
+
+      // preço
+      if(state.minPrice !== null && state.minPrice !== ''){
+        list = list.filter(b => b.price >= Number(state.minPrice));
+      }
+      if(state.maxPrice !== null && state.maxPrice !== ''){
+        list = list.filter(b => b.price <= Number(state.maxPrice));
+      }
+
+      // disponibilidade
+      if(state.inStock){
+        list = list.filter(b => b.inStock);
+      }
+      if(state.onSale){
+        list = list.filter(b => b.onSale);
+      }
+
+      // ordenação
+      switch(state.sort){
+        case 'price-asc': list.sort((a,b)=>a.price-b.price); break;
+        case 'price-desc': list.sort((a,b)=>b.price-a.price); break;
+        case 'rating-desc': list.sort((a,b)=>b.rating-b.rating ? b.rating-a.rating : 0); break;
+        case 'newest': list.sort((a,b)=>b.year-b.year ? b.year-a.year : 0); break;
+        default: /* relevância mantém ordem */ break;
+      }
+
+      state.books = list;
+      renderPage();
+    }
+
+    function renderPage(){
+      const start = (state.page - 1) * state.perPage;
+      const end = start + state.perPage;
+      const pageItems = state.books.slice(start, end);
+
+      catalogGrid.innerHTML = '';
+      if(pageItems.length === 0){
+        catalogGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--muted)">Nenhum livro encontrado com os filtros aplicados.</div>';
+      }else{
+        pageItems.forEach(book => {
+          const card = document.createElement('article');
+          card.className = 'book-card fade-in';
+          card.setAttribute('tabindex','0');
+          card.innerHTML = `
+            <div class="book-cover" aria-hidden="true">
+              <img src="${book.cover}" alt="${escapeHtml(book.title)} capa" />
+            </div>
+            <div class="book-info">
+              <h4>${escapeHtml(book.title)}</h4>
+              <p>${escapeHtml(book.author)}</p>
+              <p style="color:var(--muted); font-size:0.85rem">${escapeHtml(book.category)} • ${book.year}</p>
+            </div>
+            <div class="price-row">
+              <div>
+                <div class="price">${formatCurrency(book.price)}</div>
+                ${book.oldPrice ? `<div class="old-price">${formatCurrency(book.oldPrice)}</div>` : ''}
+              </div>
+              <div style="text-align:right">
+                <div style="color:${book.inStock ? 'var(--muted)' : 'var(--danger)'}; font-weight:700">${book.inStock ? 'Em estoque' : 'Esgotado'}</div>
+                <div style="color:var(--muted); font-size:0.85rem">Avaliação ${book.rating}</div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn" data-action="details" data-id="${book.id}">Detalhes</button>
+              <button class="btn secondary" data-action="add" data-id="${book.id}" ${book.inStock ? '' : 'disabled'}>Adicionar</button>
+            </div>
+          `;
+          catalogGrid.appendChild(card);
+        });
+      }
+
+      resultsCount.textContent = state.books.length;
+      pageInfo.textContent = `Página ${state.page} de ${Math.max(1, Math.ceil(state.books.length / state.perPage))}`;
+    }
+
+    /* ===========================
+       Eventos de interação
+       =========================== */
+    // busca em tempo real com debounce
+    let searchTimer = null;
+    byId('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        state.query = e.target.value;
+        state.page = 1;
+        applyFilters();
+      }, 300);
+    });
+
+    // filtros
+    byId('categorySelect').addEventListener('change', (e) => { state.category = e.target.value; });
+    byId('minPrice').addEventListener('input', (e) => { state.minPrice = e.target.value; });
+    byId('maxPrice').addEventListener('input', (e) => { state.maxPrice = e.target.value; });
+    byId('sortSelect').addEventListener('change', (e) => { state.sort = e.target.value; });
+    byId('inStock').addEventListener('change', (e) => { state.inStock = e.target.checked; });
+    byId('onSale').addEventListener('change', (e) => { state.onSale = e.target.checked; });
+
+    byId('applyFilters').addEventListener('click', () => { state.page = 1; applyFilters(); });
+    byId('clearFilters').addEventListener('click', () => {
+      state.category = '';
+      state.minPrice = null;
+      state.maxPrice = null;
+      state.sort = 'relevance';
+      state.inStock = false;
+      state.onSale = false;
+      byId('categorySelect').value = '';
+      byId('minPrice').value = '';
+      byId('maxPrice').value = '';
+      byId('sortSelect').value = 'relevance';
+      byId('inStock').checked = false;
+      byId('onSale').checked = false;
+      state.page = 1;
+      applyFilters();
+    });
+
+    // paginação
+    byId('prevPage').addEventListener('click', () => {
+      if(state.page > 1){ state.page--; renderPage(); }
+    });
+    byId('nextPage').addEventListener('click', () => {
+      const maxPage = Math.max(1, Math.ceil(state.books.length / state.perPage));
+      if(state.page < maxPage){ state.page++; renderPage(); }
+    });
+
+    // delegação de eventos no catálogo
+    catalogGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      if(action === 'details') openModal(id);
+      if(action === 'add') addToCart(id, 1);
+    });
+
+    // teclado para abrir detalhes com Enter
+    catalogGrid.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        const card = e.target.closest('.book-card');
+        if(card){
+          const btn = card.querySelector('button[data-action="details"]');
+          if(btn) btn.click();
+        }
+      }
+    });
+
+    /* ===========================
+       Modal de detalhes
+       =========================== */
+    const modalBackdrop = byId('modalBackdrop');
+    const modalClose = byId('modalClose');
+    const modalCover = byId('modalCover');
+    const modalTitle = byId('modalTitle');
+    const modalMeta = byId('modalMeta');
+    const modalDescription = byId('modalDescription');
+    const modalPrice = byId('modalPrice');
+    const modalOldPrice = byId('modalOldPrice');
+    const modalDetails = byId('modalDetails');
+    const modalAddCart = byId('modalAddCart');
+
+    function openModal(id){
+      const book = findBook(id);
+      if(!book) return;
+      modalCover.innerHTML = `<img src="${book.cover}" alt="${escapeHtml(book.title)} capa" style="width:100%; height:100%; object-fit:cover" />`;
+      modalTitle.textContent = book.title;
+      modalMeta.textContent = `${book.author} • ${book.category} • ${book.year}`;
+      modalDescription.textContent = book.description;
+      modalPrice.textContent = formatCurrency(book.price);
+      modalOldPrice.textContent = book.oldPrice ? formatCurrency(book.oldPrice) : '';
+      modalDetails.innerHTML = `
+        <li>Páginas: ${book.pages}</li>
+        <li>Editora: ${escapeHtml(book.publisher)}</li>
+        <li>Avaliação: ${book.rating}</li>
+      `;
+      modalAddCart.dataset.id = book.id;
+      modalBackdrop.classList.add('open');
+      modalBackdrop.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e) => {
+      if(e.target === modalBackdrop) closeModal();
+    });
+
+    function closeModal(){
+      modalBackdrop.classList.remove('open');
+      modalBackdrop.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    modalAddCart.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      if(id) addToCart(id, 1);
+      closeModal();
+    });
+
+    /* ===========================
+       Carrinho
+       =========================== */
+    const cartBtn = byId('cartBtn');
+    const cartDrawer = byId('cartDrawer');
+    const closeCart = byId('closeCart');
+    const cartItemsEl = byId('cartItems');
+    const cartSubtotalEl = byId('cartSubtotal');
+    const cartCountEl = byId('cartCount');
+    const checkoutBtn = byId('checkoutBtn');
+    const clearCartBtn = byId('clearCart');
+
+    cartBtn.addEventListener('click', () => {
+      cartDrawer.classList.add('open');
+      cartDrawer.setAttribute('aria-hidden','false');
+    });
+
+    closeCart.addEventListener('click', () => {
+      cartDrawer.classList.remove('open');
+      cartDrawer.setAttribute('aria-hidden','true');
+    });
+
+    function addToCart(id, qty = 1){
+      const book = findBook(id);
+      if(!book) return;
+      const existing = state.cart.find(i => i.id === id);
+      if(existing){
+        existing.qty += qty;
+      }else{
+        state.cart.push({ id, qty });
+      }
+      saveCart();
+      showToast(`Adicionado ${book.title} ao carrinho`);
+    }
+
+    function removeFromCart(id){
+      state.cart = state.cart.filter(i => i.id !== id);
+      saveCart();
+    }
+
+    function updateCartQty(id, qty){
+      const item = state.cart.find(i => i.id === id);
+      if(!item) return;
+      item.qty = Math.max(1, qty);
+      saveCart();
+    }
+
+    function updateCartUI(){
+      cartItemsEl.innerHTML = '';
+      let subtotal = 0;
+      if(state.cart.length === 0){
+        cartItemsEl.innerHTML = '<div style="color:var(--muted)">Seu carrinho está vazio</div>';
+      }else{
+        state.cart.forEach(item => {
+          const book = findBook(item.id);
+          if(!book) return;
+          const el = document.createElement('div');
+          el.className = 'cart-item';
+          el.innerHTML = `
+            <img src="${book.cover}" alt="${escapeHtml(book.title)} capa" />
+            <div style="flex:1">
+              <div style="font-weight:800">${escapeHtml(book.title)}</div>
+              <div style="color:var(--muted); font-size:0.9rem">${escapeHtml(book.author)}</div>
+              <div style="margin-top:6px; display:flex; gap:8px; align-items:center">
+                <input type="number" min="1" value="${item.qty}" style="width:72px; padding:6px; border-radius:8px; border:1px solid rgba(15,23,42,0.06)" data-id="${item.id}" class="cart-qty" />
+                <div style="font-weight:900; margin-left:auto">${formatCurrency(book.price * item.qty)}</div>
+              </div>
+            </div>
+            <div>
+              <button class="close-btn" data-remove="${item.id}" aria-label="Remover item">✕</button>
+            </div>
+          `;
+          cartItemsEl.appendChild(el);
+          subtotal += book.price * item.qty;
+        });
+      }
+      cartSubtotalEl.textContent = formatCurrency(subtotal);
+      cartCountEl.textContent = state.cart.reduce((s,i)=>s+i.qty,0);
+    }
+
+    // delegação para remover e alterar quantidade
+    cartItemsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-remove]');
+      if(btn){
+        const id = btn.dataset.remove;
+        removeFromCart(id);
+      }
+    });
+
+    cartItemsEl.addEventListener('change', (e) => {
+      const input = e.target.closest('input.cart-qty');
+      if(input){
+        const id = input.dataset.id;
+        const qty = Number(input.value);
+        updateCartQty(id, qty);
+      }
+    });
+
+    checkoutBtn.addEventListener('click', () => {
+      if(state.cart.length === 0){
+        showToast('Seu carrinho está vazio', true);
+        return;
+      }
+      // Simulação de checkout
+      showToast('Compra finalizada com sucesso', false);
+      state.cart = [];
+      saveCart();
+      cartDrawer.classList.remove('open');
+    });
+
+    clearCartBtn.addEventListener('click', () => {
+      state.cart = [];
+      saveCart();
+    });
+
+    /* ===========================
+       Tema claro e escuro
+       =========================== */
+    const themeToggle = byId('themeToggle');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem('livraria_theme');
+
+    function applyTheme(theme){
+      if(theme === 'dark'){
+        document.documentElement.classList.add('dark');
+        themeToggle.textContent = 'Modo Claro';
+        themeToggle.setAttribute('aria-pressed','true');
+      }else{
+        document.documentElement.classList.remove('dark');
+        themeToggle.textContent = 'Modo Escuro';
+        themeToggle.setAttribute('aria-pressed','false');
+      }
+      localStorage.setItem('livraria_theme', theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    // inicializa tema
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light'));
+
+    /* ===========================
+       Formulário de contato
+       =========================== */
+    const contactForm = byId('contactForm');
+    const contactError = byId('contactError');
+
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      contactError.style.display = 'none';
+      const name = byId('name').value.trim();
+      const email = byId('email').value.trim();
+      const message = byId('message').value.trim();
+
+      if(!name || !email || !message){
+        contactError.textContent = 'Preencha todos os campos antes de enviar.';
+        contactError.style.display = 'block';
+        return;
+      }
+
+      if(!validateEmail(email)){
+        contactError.textContent = 'Informe um email válido.';
+        contactError.style.display = 'block';
+        return;
+      }
+
+      // Simula envio
+      showToast('Mensagem enviada. Obrigado!', false);
+      contactForm.reset();
+    });
+
+    function validateEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    /* ===========================
+       Pequenas utilidades UI
+       =========================== */
+    function showToast(message, isError = false){
+      const t = document.createElement('div');
+      t.textContent = message;
+      t.style.position = 'fixed';
+      t.style.right = '20px';
+      t.style.bottom = '20px';
+      t.style.background = isError ? 'var(--danger)' : 'var(--accent)';
+      t.style.color = 'white';
+      t.style.padding = '12px 16px';
+      t.style.borderRadius = '10px';
+      t.style.boxShadow = 'var(--shadow)';
+      t.style.zIndex = 9999;
+      document.body.appendChild(t);
+      setTimeout(()=> t.style.opacity = '0', 2600);
+      setTimeout(()=> t.remove(), 3000);
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* ===========================
+       Inicialização
+       =========================== */
+    function init(){
+      byId('year').textContent = new Date().getFullYear();
+      applyFilters();
+      updateCartUI();
+
+      // atalhos
+      byId('exploreBtn').addEventListener('click', () => {
+        document.querySelector('#catalogo').scrollIntoView({behavior:'smooth'});
+      });
+
+      byId('promoBtn').addEventListener('click', () => {
+        state.onSale = true;
+        byId('onSale').checked = true;
+        applyFilters();
+      });
+
+      // fechar modais com ESC
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          closeModal();
+          cartDrawer.classList.remove('open');
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
